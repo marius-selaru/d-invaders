@@ -88,9 +88,12 @@ class Projectile {
 }
 
 class Invader {
-    constructor({position}) {
+    constructor() {
+        //  const randomX =  -)
+        //  const randomY = Math.floor(Math.random() * (canvas.height / 2 - 179.2) + 100)
+
         this.velocity = {
-            x: 0,
+            x: 3,
             y: 0
         }
         
@@ -102,12 +105,9 @@ class Invader {
             this.width = image.width * scale
             this.height = image.height * scale
 
-            console.log(this.width)
-            console.log(this.height)
-
             this.position = {
-                x: position.x,
-                y: position.y
+                x: Math.floor(Math.random() * 300 + 200),
+                y: Math.floor(Math.random() * (canvas.height / 2 - this.height))
             }
         }
     }
@@ -115,57 +115,31 @@ class Invader {
     draw() {
         // context.fillStyle = 'red';
         // context.fillRect(this.position.x, this.position.y, this.width, this.height);
+        if(this.position.x > canvas.width) {
+            console.log('here');
+        }
         context.drawImage(this.image, this.position.x, this.position.y, this.width, this.height)
+        
     }
 
-    update({velocity}) {
+    update() {
         if(this.image) {
             this.draw()
-            this.position.x += velocity.x
-            this.position.y += velocity.y
+            this.position.x += this.velocity.x 
+            this.position.y += this.velocity.y
+            this.velocity.y = 0
+            
+            if(this.position.x + this.width >= canvas.width || this.position.x <= 0) {
+                this.velocity.x = -this.velocity.x
+                this.velocity.y = 179.2
+            }
         }
-    }
-}
-
-class Grid {
-    constructor() {
-        const randomX = Math.floor(Math.random()* canvas.width - 113.2)
-        const randomY = Math.floor(Math.random() * (canvas.height / 2 - 179.2))
-
-        this.position = {
-            x: randomX,
-            y: randomY
-        }
-
-        this.velocity = {
-            x: 3,
-            y: 0
-        }
-
-        this.invaders = []
-        this.width = 113.2
-
-        this.invaders.push(new Invader({position: {
-            x: randomX,
-            y: randomY
-        }}))
-    }
-    
-    update() {
-        this.position.x += this.velocity.x 
-        this.position.y += this.velocity.y
-        this.velocity.y = 0
-        
-        if(this.position.x + this.width >= canvas.width || this.position.x <= 0) {
-            this.velocity.x = -this.velocity.x
-            this.velocity.y = 179.2
-        } 
     }
 }
 
 const player = new Player()
 const projectiles = []
-const grids = []
+const invaders = []
 
 const keys = {
     a: {
@@ -196,40 +170,31 @@ function animate() {
             projectile.update()
         }
     })
-    grids.forEach((grid, g) => {
-        grid.update()
-        grid.invaders.forEach((invader, i) => {
-            invader.update({
-                velocity: grid.velocity
-            })
+    invaders.forEach((invader, i) => {
+        invader.update()
 
-            projectiles.forEach((projectile, p) => {
-                if(projectile.position.y - 31 <= invader.position.y + invader.height && 
-                    projectile.position.x + 31 >= invader.position.x && 
-                    projectile.position.x - 31 <= invader.position.x + invader.width &&
-                    projectile.position.y + 31 >= invader.position.y) {
-                    setTimeout(() => {
-                        const invaderFound = grid.invaders.find(invader2 =>invader2 === invader)
-                        const projectileFound = projectiles.find(projectile2 => projectile2 === projectile)
-                        
-                        if(invaderFound && projectileFound) {
-                            grid.invaders.splice(i, 1);
-                            projectiles.splice(p, 1);
-                            grids.splice(g, 1)
-                            console.log(grids)
-
-                            if(grid.invaders.length > 0) {
-                                const firstInvader = grid.invaders[0]
-                                const lastInvader = grid.invaders[grid.invaders.length - 1]
-
-                                grid.width = lastInvader.position.x - firstInvader.position.x + lastInvader.width
-                                grid.position.x = firstInvader.position.x
-                            }
-                        }
-                    }, 0)
-                }
-            })
+        projectiles.forEach((projectile, p) => {
+            if(projectile.position.y - 31 <= invader.position.y + invader.height && 
+                projectile.position.x + 31 >= invader.position.x && 
+                projectile.position.x - 31 <= invader.position.x + invader.width &&
+                projectile.position.y + 31 >= invader.position.y) {
+                setTimeout(() => {
+                    const invaderFound = invaders.find(invader2 =>invader2 === invader)
+                    const projectileFound = projectiles.find(projectile2 => projectile2 === projectile)
+                    
+                    if(invaderFound && projectileFound) {
+                        invaders.splice(i, 1);
+                        projectiles.splice(p, 1);
+                    }
+                }, 1)
+            }
         })
+
+        if(invader.position.y - 2 *invader.height > canvas.height) {
+            setTimeout(() => {
+                 invaders.splice(i, 1)
+            })
+         }
     })
 
     const speed = 8;
@@ -245,7 +210,7 @@ function animate() {
     }
 
     if(frames % randomInterval === 0) {
-        grids.push(new Grid())
+        invaders.push(new Invader())
         randomInterval = 100
         frames = 0
     }
