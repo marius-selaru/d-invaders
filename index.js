@@ -89,13 +89,13 @@ class Projectile {
 }
 
 class Invader {
-    constructor() {
+    constructor({velocity}) {
         //  const randomX =  -)
         //  const randomY = Math.floor(Math.random() * (canvas.height / 2 - 179.2) + 100)
 
         this.velocity = {
-            x: 3,
-            y: 0
+            x: velocity.x,
+            y: velocity.y
         }
         
         const image = new Image()
@@ -116,11 +116,9 @@ class Invader {
     draw() {
         // context.fillStyle = 'red';
         // context.fillRect(this.position.x, this.position.y, this.width, this.height);
-        if(this.position.x > canvas.width) {
-            console.log('here');
+        if(!(this.position.x > canvas.width)) {
+            context.drawImage(this.image, this.position.x, this.position.y, this.width, this.height)
         }
-        context.drawImage(this.image, this.position.x, this.position.y, this.width, this.height)
-        
     }
 
     update() {
@@ -180,7 +178,9 @@ const keys = {
 
 let frames = 0;
 let randomInterval = Math.floor(Math.random() * 1500 + 1500);
+let invaderVelocity = 2
 let score = 0;
+let invaderTotalCount = 0;
 
 for (let i = 0; i < 150; i++) {
     particles.push(
@@ -263,9 +263,20 @@ function animate() {
     }
 
     if(frames % randomInterval === 0) {
-        invaders.push(new Invader())
+        invaders.push(new Invader( {
+            velocity: {
+                x: invaderVelocity,
+                y: 0
+            }
+        }))
+        invaderTotalCount++
         randomInterval = 100
         frames = 0
+    }
+
+    if(invaderTotalCount === 10) {
+        invaderTotalCount = 0
+        invaderVelocity++
     }
 
     frames++
