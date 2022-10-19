@@ -137,9 +137,33 @@ class Invader {
     }
 }
 
+class Particle {
+    constructor( {position, velocity, radius, color }) {
+        this.position = position
+        this.velocity = velocity
+        this.radius = radius
+        this.color = color
+    }
+
+    draw() {
+        context.beginPath()
+        context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
+        context.fillStyle = this.color
+        context.fill()
+        context.closePath()
+    }
+
+    update() {
+        this.draw()
+        this.position.x += this.velocity.x
+        this.position.y += this.velocity.y
+    }
+}
+
 const player = new Player()
 const projectiles = []
 const invaders = []
+const particles = []
 
 const keys = {
     a: {
@@ -156,11 +180,36 @@ const keys = {
 let frames = 0;
 let randomInterval = Math.floor(Math.random() * 1500 + 1500);
 
+for (let i = 0; i < 150; i++) {
+    particles.push(
+        new Particle({
+            position: {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height
+            },
+            velocity: {
+                x: 0,
+                y: 1,
+            },
+            radius: Math.random() * 2,
+            color: 'white'
+        }))
+} 
+
 function animate() {
     requestAnimationFrame(animate);
     context.fillStyle = 'black'
     context.fillRect(0, 0, canvas.width, canvas.height)
     player.update()
+    
+    particles.forEach(particle => {
+        if(particle.position.y - particle.radius >= canvas.height) {
+            particle.position.x = Math.random() * canvas.width
+            particle.position.y = -particle.radius
+        }
+        particle.update()
+    })
+
     projectiles.forEach((projectile, index) => {
         if(projectile.position.y + 31 <= 0) {
             setTimeout(() => {
