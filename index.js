@@ -1,3 +1,4 @@
+const scoreEl = document.querySelector('#score')
 const canvas = document.querySelector('canvas');
 const context = canvas.getContext('2d');
 
@@ -179,6 +180,7 @@ const keys = {
 
 let frames = 0;
 let randomInterval = Math.floor(Math.random() * 1500 + 1500);
+let score = 0;
 
 for (let i = 0; i < 150; i++) {
     particles.push(
@@ -232,6 +234,8 @@ function animate() {
                     const projectileFound = projectiles.find(projectile2 => projectile2 === projectile)
                     
                     if(invaderFound && projectileFound) {
+                        score += 150
+                        scoreEl.innerHTML = score;
                         invaders.splice(i, 1);
                         projectiles.splice(p, 1);
                     }
